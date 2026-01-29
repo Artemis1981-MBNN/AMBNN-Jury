@@ -37,9 +37,9 @@ This integration provides:
 
 ## Configuration Files
 
-### 1. Neural Network Configuration (`conf/neural-network.conf`)
+### 1. Neural Network Configuration (`conf/neural-network.conf.template`)
 
-This file contains Spark-specific settings for neural network operations:
+This template file contains Spark-specific settings for neural network operations and SHA tracking:
 
 ```properties
 # Enable Neural Network support
@@ -57,26 +57,54 @@ spark.mllib.neuralnetwork.maxIterations=100
 spark.broadband.neuro.enabled=true
 spark.broadband.neuro.batchSize=32
 spark.broadband.neuro.optimizer=adam
+
+# SHA tracking for version control
+spark.neuralnet.config.version=1.0.0
+spark.neuralnet.config.sha=initial
+spark.neuralnet.repository.sha=HEAD
 ```
 
-### 2. Artemis Integration Properties (`conf/artemis-integration.properties`)
+Copy this template to create your configuration:
+```bash
+cp conf/neural-network.conf.template conf/neural-network.conf
+```
 
-This file provides a configuration framework for organizing Artemis1981 repository connection settings:
+### 2. Artemis Integration Properties (`conf/artemis-integration.properties.template`)
+
+This template file provides a configuration framework for organizing Artemis1981 repository connection settings with SSH and HTTPS URLs, plus SHA tracking:
 
 **Note**: These properties serve as a configuration template. Actual integration functionality would require additional implementation.
 
 ```properties
-# Repository connection
+# Repository connection (SSH and HTTPS)
+artemis.repository.ssh=git@github.com:Jury1981/Artemis1981.git
 artemis.repository.url=https://github.com/Jury1981/Artemis1981
 artemis.integration.mode=active
+
+# SHA tracking and version control
+artemis.sync.commit.sha=HEAD
+artemis.integration.version=1.0.0
+artemis.integration.version.sha=initial
+artemis.sync.auto.update.sha=true
 
 # Data synchronization
 artemis.data.sync.enabled=true
 artemis.data.sync.frequency=300
+artemis.data.sync.protocol=ssh
 
 # Neural network coordination
 artemis.neuralnet.coordination=enabled
 artemis.neuralnet.dataflow=bidirectional
+
+# SSH authentication
+artemis.ssh.key.path=~/.ssh/id_rsa
+artemis.ssh.known.hosts=~/.ssh/known_hosts
+artemis.ssh.timeout=30
+```
+
+Copy this template to create your configuration:
+```bash
+cp conf/artemis-integration.properties.template conf/artemis-integration.properties
 ```
 
 ## Usage
@@ -110,8 +138,18 @@ predictions = model.transform(test_data)
 
 ### Running the Integration Example
 
+First, set up the configuration files:
 ```bash
-# Using spark-submit
+# Copy configuration templates
+cp conf/neural-network.conf.template conf/neural-network.conf
+cp conf/artemis-integration.properties.template conf/artemis-integration.properties
+
+# Edit configurations as needed (e.g., update SSH keys, SHA values)
+```
+
+Then run the example:
+```bash
+# Using spark-submit with config files
 ./bin/spark-submit \
   --conf spark.mllib.neuralnetwork.enabled=true \
   --conf spark.artemis.integration.enabled=true \
