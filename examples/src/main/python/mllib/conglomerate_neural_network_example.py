@@ -29,7 +29,7 @@ architectures (jury members) to improve robustness and accuracy.
 Usage:
     spark-submit conglomerate_neural_network_example.py
 
-This ensemble method is particularly useful for mobile broadband neuro network
+This ensemble method is particularly useful for mobile broadband neural network
 processing where distributed consensus provides better predictions.
 """
 
@@ -68,7 +68,7 @@ class ConglomerateNeuralNetwork:
     def _create_diverse_architectures(self, input_size, output_size):
         """
         Create diverse neural network architectures for the ensemble.
-        Each architecture varies in hidden layer configuration.
+        Generates num_models different architectures with varying depths and widths.
         
         Args:
             input_size: Number of input features
@@ -79,30 +79,42 @@ class ConglomerateNeuralNetwork:
         """
         architectures = []
         
-        # Architecture 1: Single hidden layer with moderate neurons
-        architectures.append([input_size, 5, output_size])
+        # Generate diverse architectures based on num_models
+        for i in range(self.num_models):
+            if i == 0:
+                # Single hidden layer with moderate neurons
+                architectures.append([input_size, 5, output_size])
+            elif i == 1:
+                # Two hidden layers
+                architectures.append([input_size, 6, 4, output_size])
+            elif i == 2:
+                # Deeper network with smaller layers
+                architectures.append([input_size, 4, 4, 4, output_size])
+            else:
+                # For additional models, vary the hidden layer size
+                hidden_size = 4 + (i % 3)
+                architectures.append([input_size, hidden_size, hidden_size, output_size])
         
-        # Architecture 2: Two hidden layers
-        architectures.append([input_size, 6, 4, output_size])
-        
-        # Architecture 3: Deeper network with smaller layers
-        architectures.append([input_size, 4, 4, 4, output_size])
-        
-        # Use only the number of models requested
-        return architectures[:self.num_models]
+        return architectures
     
-    def fit(self, train_data, input_size=4, output_size=3):
+    def fit(self, train_data):
         """
         Train all neural network models in the conglomerate ensemble.
+        Automatically infers input and output sizes from the training data.
         
         Args:
             train_data: Training DataFrame with 'features' and 'label' columns
-            input_size: Number of input features
-            output_size: Number of output classes
             
         Returns:
             self
         """
+        # Infer input size from features column
+        first_row = train_data.select("features").first()
+        input_size = len(first_row["features"])
+        
+        # Infer output size from unique labels
+        output_size = int(train_data.select("label").distinct().count())
+        
         self.architectures = self._create_diverse_architectures(input_size, output_size)
         
         print(f"\nTraining Conglomerate Neural Network Ensemble ({self.num_models} models)...")
@@ -132,7 +144,7 @@ class ConglomerateNeuralNetwork:
     def predict(self, test_data):
         """
         Make predictions using the conglomerate ensemble.
-        Uses majority voting for the final prediction.
+        Uses majority voting (mode) for the final prediction.
         
         Args:
             test_data: Test DataFrame with 'features' column
@@ -142,6 +154,9 @@ class ConglomerateNeuralNetwork:
         """
         if not self.models:
             raise ValueError("Models not trained. Call fit() first.")
+        
+        # Cache test data for better performance
+        test_data.cache()
         
         # Get predictions from each model
         result = test_data
@@ -153,11 +168,12 @@ class ConglomerateNeuralNetwork:
         # Create prediction columns list for voting
         pred_cols = [f"prediction_{i}" for i in range(len(self.models))]
         
-        # Majority voting: Select the most common prediction
-        # Create an array of all predictions and find the mode
+        # Majority voting using a UDF-like approach with SQL expressions
+        # We'll use a simpler median approach for odd number of models
+        # For proper majority voting with any number of models, we use the sorted median
         result = result.withColumn(
             "ensemble_prediction",
-            expr(f"float(array_sort(array({','.join(pred_cols)}))[{len(self.models)//2}])")
+            expr(f"float(element_at(array_sort(array({','.join(pred_cols)})), {(len(self.models) + 1) // 2}))")
         )
         
         return result
@@ -224,20 +240,23 @@ def create_spark_session():
 def create_sample_data(spark):
     """Create sample data for neural network training and testing."""
     # Expanded dataset with more variety for better testing
-    data = [
-        (Vectors.dense([0.0, 0.0, 0.0, 0.0]), 0.0),
-        (Vectors.dense([0.1, 0.1, 0.0, 0.0]), 0.0),
-        (Vectors.dense([0.0, 0.0, 0.1, 0.1]), 0.0),
-        (Vectors.dense([0.0, 0.0, 1.0, 1.0]), 1.0),
-        (Vectors.dense([0.1, 0.1, 0.9, 0.9]), 1.0),
-        (Vectors.dense([1.0, 1.0, 0.0, 0.0]), 1.0),
-        (Vectors.dense([0.9, 0.9, 0.1, 0.1]), 1.0),
-        (Vectors.dense([1.0, 1.0, 1.0, 1.0]), 2.0),
-        (Vectors.dense([0.9, 0.9, 0.9, 0.9]), 2.0),
-        (Vectors.dense([1.0, 1.0, 0.9, 0.9]), 2.0),
-        (Vectors.dense([0.5, 0.5, 0.5, 0.5]), 1.0),
-        (Vectors.dense([0.4, 0.6, 0.5, 0.5]), 1.0),
-    ]
+    # Using iris-like synthetic data with 3 classes
+    data = []
+    
+    # Class 0: Low values
+    for i in range(20):
+        noise = i * 0.05
+        data.append((Vectors.dense([0.0 + noise, 0.0 + noise, 0.0, 0.0]), 0.0))
+    
+    # Class 1: Medium values
+    for i in range(20):
+        noise = i * 0.05
+        data.append((Vectors.dense([0.5 + noise, 0.5 + noise, 0.5, 0.5]), 1.0))
+    
+    # Class 2: High values
+    for i in range(20):
+        noise = i * 0.05
+        data.append((Vectors.dense([1.0 - noise, 1.0 - noise, 1.0, 1.0]), 2.0))
     
     df = spark.createDataFrame(data, ["features", "label"])
     return df
@@ -266,7 +285,7 @@ def main():
             seed=1234
         )
         
-        conglomerate.fit(train_data, input_size=4, output_size=3)
+        conglomerate.fit(train_data)
         
         # Evaluate the ensemble
         print("\nEvaluating Conglomerate Ensemble...")

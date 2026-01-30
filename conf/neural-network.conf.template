@@ -60,10 +60,5 @@ spark.neuralnet.repository.sha=HEAD
 spark.mllib.neuralnetwork.conglomerate.enabled=true
 
 # Number of neural network models in the conglomerate ensemble
+# This is a documentation parameter - actual value set in code
 spark.mllib.neuralnetwork.conglomerate.numModels=3
-
-# Voting strategy for ensemble predictions (majority, weighted, average)
-spark.mllib.neuralnetwork.conglomerate.votingStrategy=majority
-
-# Diversity seed offset for creating diverse architectures
-spark.mllib.neuralnetwork.conglomerate.diversitySeed=100

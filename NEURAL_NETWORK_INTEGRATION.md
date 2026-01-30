@@ -151,7 +151,6 @@ spark.broadband.neuro.batchSize=32
 # Conglomerate Ensemble
 spark.mllib.neuralnetwork.conglomerate.enabled=true
 spark.mllib.neuralnetwork.conglomerate.numModels=3
-spark.mllib.neuralnetwork.conglomerate.votingStrategy=majority
 
 # Artemis Integration
 spark.artemis.repository=https://github.com/Jury1981/Artemis1981
