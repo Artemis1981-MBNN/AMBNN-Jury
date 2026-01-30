@@ -51,3 +51,14 @@ spark.neuralnet.config.sha=initial
 # Repository SHA tracking for neural network integration
 # HEAD is a placeholder - replace with actual commit SHA to pin to a specific version
 spark.neuralnet.repository.sha=HEAD
+
+# ============================================================================
+# Conglomerate Neural Network Ensemble Settings
+# ============================================================================
+
+# Enable conglomerate (jury-based ensemble) neural networks
+spark.mllib.neuralnetwork.conglomerate.enabled=true
+
+# Number of neural network models in the conglomerate ensemble
+# This is a documentation parameter - actual value set in code
+spark.mllib.neuralnetwork.conglomerate.numModels=3
