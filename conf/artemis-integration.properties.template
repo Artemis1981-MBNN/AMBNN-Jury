@@ -1,0 +1,93 @@
+# Artemis1981 Integration Configuration
+# This file provides configuration framework for integrating with the Jury1981/Artemis1981
+# repository for mobile broadband neuro network processing.
+#
+# Note: These properties serve as a configuration template. Actual integration functionality
+# would require additional implementation based on specific integration requirements.
+
+# ============================================================================
+# Repository Connection (SSH and HTTPS)
+# ============================================================================
+
+# Primary SSH URL for secure repository access
+# Note: Customize the username/org if using a fork or different repository
+artemis.repository.ssh=git@github.com:Jury1981/Artemis1981.git
+
+# Alternative HTTPS URL
+# Note: Customize the username/org if using a fork or different repository
+artemis.repository.url=https://github.com/Jury1981/Artemis1981
+
+# Repository branch
+artemis.repository.branch=main
+
+# Integration mode (active, passive, readonly)
+artemis.integration.mode=active
+
+# ============================================================================
+# SHA Tracking and Version Control
+# ============================================================================
+
+# Track latest synchronized commit SHA
+# HEAD is a placeholder - will be replaced with actual commit SHA during sync operations
+artemis.sync.commit.sha=HEAD
+
+# Version tracking for integration compatibility
+artemis.integration.version=1.0.0
+# Initial placeholder - will be updated with actual commit SHA during deployment
+artemis.integration.version.sha=initial
+
+# Auto-update SHA on sync
+# When true, automatically updates artemis.sync.commit.sha with the latest commit SHA during sync operations
+artemis.sync.auto.update.sha=true
+
+# ============================================================================
+# Data Synchronization
+# ============================================================================
+
+# Enable bidirectional data synchronization
+artemis.data.sync.enabled=true
+
+# Sync frequency in seconds (300 = 5 minutes)
+artemis.data.sync.frequency=300
+
+# Sync protocol (ssh, https, git)
+artemis.data.sync.protocol=ssh
+
+# ============================================================================
+# Neural Network Coordination
+# ============================================================================
+
+# Enable neural network coordination with Artemis
+artemis.neuralnet.coordination=true
+
+# Data flow direction (bidirectional, upload, download)
+artemis.neuralnet.dataflow=bidirectional
+
+# Neural network model synchronization
+artemis.neuralnet.model.sync=true
+
+# ============================================================================
+# Authentication and Security (SSH)
+# ============================================================================
+
+# SSH key path (customize to point to your actual SSH private key)
+artemis.ssh.key.path=~/.ssh/id_rsa
+
+# SSH known hosts file
+artemis.ssh.known.hosts=~/.ssh/known_hosts
+
+# SSH connection timeout (seconds)
+artemis.ssh.timeout=30
+
+# ============================================================================
+# Logging and Monitoring
+# ============================================================================
+
+# Enable integration logging
+artemis.logging.enabled=true
+
+# Log level (DEBUG, INFO, WARN, ERROR)
+artemis.logging.level=INFO
+
+# Track SHA changes in logs
+artemis.logging.track.sha=true
